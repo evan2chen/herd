@@ -1,18 +1,53 @@
 # herd
 
-Multi-provider subagent orchestration for [Herdr](https://herdr.dev). Routes tasks to Claude, Codex or Cursor by tier and live quota, and places each subagent in a pane of the current tab, overflowing into `herd-N` tabs.
+herd lets one coding agent delegate work to Claude Code, Codex and Cursor subagents running side by side in [Herdr](https://herdr.dev). It routes each task to the provider with quota to spare, gives every agent its own pane and git worktree, collects structured reports, and squash-merges accepted work into your branch.
+
+You can use herd if you have:
+
+- [Herdr](https://herdr.dev), with herd run from inside a Herdr pane
+- Node 22 or newer and `quota-axi` on your `PATH`
+- The `claude`, `codex` and `cursor-agent` CLIs, signed in (set `providers` in the [config](#configuration) to use a subset)
+
+## Features
+
+- **Quota-aware provider routing** - picks a provider from live `quota-axi` data, skips any below `cutoff_percent` or cooling down, and ranks the rest by spend priority.
+- **Native Windows support** - runs directly on Windows without WSL, matches paths case-insensitively, and ships a command policy covering PowerShell cmdlets alongside POSIX tools.
+- **Automatic rate-limit failover** - detects rate-limit messages, cools the provider down and requeues the task on another provider in the same worktree, keeping partial work.
+- **Tiers instead of model names** - ask for `deep`, `standard` or `fast`; each tier maps to a model per provider and is configurable.
+- **Isolated git worktrees** - write agents work on `herd/<id>` branches, read agents on a detached HEAD, and herd makes every commit.
+- **Visible agents** - each agent gets a split pane in the current tab, overflowing into `herd-N` tabs; `peek`, `send` and `keys` let you watch, steer and answer dialogs.
+- **Structured reports and events** - agents write a validated JSON report, and `herd wait` wakes the orchestrator on `reported`, `blocked`, `stalled` and other events.
+- **Review before merge** - `diff` flags out-of-scope edits, `verify` runs repo checks, `integrate` squash-merges, `sync` hands conflicts back, and `discard` keeps a recoverable commit.
+- **Per-provider guardrails** - Claude and Cursor get generated allow/deny lists that block pushes, branch changes and publishing; Codex runs in its workspace-write sandbox.
+- **Queueing and recovery** - spawns beyond `max_active` or without quota queue until a slot or reset; `reconcile` repairs the session ledger after crashes.
+- **Cross-provider review** - `spawn --avoid <provider>` gets a second opinion from a different provider.
+- **Built for agents** - compact TOON output plus a Claude Code skill that teaches the orchestration workflow.
 
 ## Install
 
 ```sh
+git clone https://github.com/evan2chen/herd.git
+cd herd
 npm install
 npm link
 herd doctor
 ```
 
-Requires Node 22+, `quota-axi`, and the `claude`, `codex` and `cursor-agent` CLIs. Run `herd` from inside a Herdr pane.
+`herd doctor` checks Herdr, quota-axi, each provider CLI and the configured model IDs. To let Claude Code orchestrate, copy [skill/SKILL.md](skill/SKILL.md) to `~/.claude/skills/herd/SKILL.md`.
 
-Install the orchestrator skill for Claude Code by copying [skill/SKILL.md](skill/SKILL.md) to `~/.claude/skills/herd/SKILL.md`. For repository work, start with [AGENTS.md](AGENTS.md) and the [feature map](#feature-map).
+## Quick start
+
+```sh
+herd spawn --tier standard --task task.md --write --scope 'src/**'
+herd wait
+herd collect <id>
+herd diff <id>
+herd verify <id>
+herd integrate <id>
+herd reap
+```
+
+`task.md` describes the goal, context and done criteria; herd appends the operating contract. On `merge_conflict`, run `herd sync <id>` and ask the agent to resolve it with `herd send`.
 
 ## Commands
 
@@ -20,7 +55,7 @@ Run `herd --help` for the full list: `pick`, `spawn`, `wait`, `collect`, `send`,
 
 Inside a git repo every agent gets a worktree at `<repo-parent>/.herd-worktrees/<repo>/<id>`: `--write` agents on branch `herd/<id>`, read agents on a detached HEAD. Agents only edit files; herd commits their work when it integrates, syncs or discards. Each agent's brief is `.herd/<id>/brief.md` and its answer `.herd/<id>/report.json` inside its working directory; `.herd/` is added to the repo's `info/exclude`.
 
-Run `herd wait` in the background to start queued agents and receive `reported`, `blocked`, `stalled`, `long_running`, `invalid_report` and `exited` events. When an agent hits a rate limit, `wait` cools that provider down and requeues the task in the same worktree (`failed_over`), starting it when quota and a slot allow, or reports `rate_limited` when `auto_failover = false`. A typical write flow is `herd spawn --tier standard --task task.md --write --scope 'src/**'`, `wait`, `collect`, `diff`, `verify`, `integrate`, then `reap`. On `merge_conflict`, run `sync` and ask the agent to resolve the conflicts with `send`.
+Run `herd wait` in the background to start queued agents and receive `reported`, `blocked`, `stalled`, `long_running`, `invalid_report` and `exited` events. When an agent hits a rate limit, `wait` cools that provider down and requeues the task in the same worktree (`failed_over`), starting it when quota and a slot allow, or reports `rate_limited` when `auto_failover = false`.
 
 Worktrees start from committed HEAD; commit any changes the task needs before spawning. `spawn --cwd <dir>` selects the task directory and preserves its relative location inside the worktree. Outside git, read agents use that directory directly; write agents require a git repo. `--scope` supplies brief guidance and `diff` checks, so review `outOfScope` before integrating.
 
@@ -62,7 +97,7 @@ The e2e suite uses all three provider CLIs and skips outside Herdr (`HERDR_ENV=1
 
 ## Feature map
 
-Paths are relative to the repository root. Tests listed here exercise the feature; rows marked `-` have no dedicated test.
+For repository work, start with [AGENTS.md](AGENTS.md). Paths are relative to the repository root. Tests listed here exercise the feature; rows marked `-` have no dedicated test.
 
 | Feature / subsystem | Implementation | Tests |
 |---|---|---|
