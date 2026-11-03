@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 5,
+  "providers": [
+    {
+      "provider": "claude",
+      "windows": [
+        { "id": "five_hour", "resetsAt": "2026-10-24T23:00:00.339877+00:00", "percentRemaining": 92 },
+        { "id": "seven_day", "resetsAt": "2026-10-29T10:00:00.339898+00:00", "percentRemaining": 96 }
+      ],
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 92,
+            "limitingWindowIds": ["five_hour"],
+            "selection": { "status": "known", "spendPriority": 1.3295 }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "windows": [
+        { "id": "five_hour", "resetsAt": "2026-10-25T00:21:03.000Z", "percentRemaining": 100 },
+        { "id": "weekly", "resetsAt": "2026-10-30T20:52:23.000Z", "percentRemaining": 99 }
+      ],
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 99,
+            "limitingWindowIds": ["weekly"],
+            "selection": { "status": "unknown", "unmeasurableWindowIds": ["five_hour"] }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "cursor",
+      "windows": [
+        { "id": "included_usage", "resetsAt": "2026-11-19T21:22:37.000Z", "percentRemaining": 99 },
+        { "id": "auto_usage", "resetsAt": "2026-11-19T21:22:37.000Z", "percentRemaining": 99 },
+        { "id": "grok_bot", "percentRemaining": 100 }
+      ],
+      "quotaSemantics": {
+        "status": "known",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 99,
+            "limitingWindowIds": ["included_usage", "auto_usage"],
+            "selection": { "status": "known", "spendPriority": 1.1385 }
+          },
+          {
+            "scope": "grok_bot",
+            "status": "known",
+            "effectivePercentRemaining": 100,
+            "limitingWindowIds": ["grok_bot"],
+            "selection": { "status": "unknown", "unmeasurableWindowIds": ["grok_bot"] }
+          }
+        ]
+      }
+    }
+  ]
+}
