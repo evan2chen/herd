@@ -1,18 +1,48 @@
 # herd
 
-Multi-provider subagent orchestration for [Herdr](https://herdr.dev). Routes tasks to Claude, Codex or Cursor by tier and live quota, and places each subagent in a pane of the current tab, overflowing into `herd-N` tabs.
+herd lets one coding agent delegate work to Claude Code, Codex and Cursor subagents running side by side in [Herdr](https://herdr.dev). It routes each task to the provider with quota to spare, gives every agent its own pane and git worktree, collects structured reports, and squash-merges accepted work into your branch.
+
+You can use herd if you have:
+
+- [Herdr](https://herdr.dev), with herd run from inside a Herdr pane
+- Node 22 or newer and [`quota-axi`](https://github.com/kunchenguid/quota-axi) on your `PATH`
+- The `claude`, `codex` and `cursor-agent` CLIs, signed in (set `providers` in the [config](#configuration) to use a subset)
+
+## Features
+
+- **Quota-aware provider routing** - picks models based on task difficulty and providers based on remaining usage credits using [`quota-axi`](https://github.com/kunchenguid/quota-axi).
+- **Native Windows support** - runs directly on Windows with no WSL needed, and its default command permissions cover PowerShell as well as Unix shells.
+- **Task queue** - when too many agents are running or no provider has usage left, new tasks wait in line, and `herd wait` starts them once a slot opens or usage resets.
+- **Edit safety** - each agent edits its own copy of the repo, so parallel work stays separate from other agents and from your checkout. Nothing reaches your branch until you review it and accept it with `herd integrate`, and each provider's permissions limit what agents can run.
+- **Robust to rate-limit violations** - when a provider hits its usage limit mid-task, herd pauses that provider and moves the task to the next available one, keeping the work done so far.
+- **Visible & interactive agents** - each agent runs in its own split pane, so you can watch it work and step in by typing to it directly.
+- **TOON output** - commands print [TOON](https://toonformat.dev/), a compact format that carries the same data as JSON in fewer tokens, so the orchestrating agent spends less of its context reading results.
 
 ## Install
 
 ```sh
+git clone https://github.com/evan2chen/herd.git
+cd herd
 npm install
 npm link
 herd doctor
 ```
 
-Requires Node 22+, `quota-axi`, and the `claude`, `codex` and `cursor-agent` CLIs. Run `herd` from inside a Herdr pane.
+`herd doctor` checks Herdr, quota-axi, each provider CLI and the configured model IDs. To let Claude Code orchestrate, copy [skill/SKILL.md](skill/SKILL.md) to `~/.claude/skills/herd/SKILL.md`.
 
-Install the orchestrator skill for Claude Code by copying [skill/SKILL.md](skill/SKILL.md) to `~/.claude/skills/herd/SKILL.md`. For repository work, start with [AGENTS.md](AGENTS.md) and the [feature map](#feature-map).
+## Quick start
+
+```sh
+herd spawn --tier standard --task task.md --write --scope 'src/**'
+herd wait
+herd collect <id>
+herd diff <id>
+herd verify <id>
+herd integrate <id>
+herd reap
+```
+
+`task.md` describes the goal, context and done criteria; herd appends the operating contract. On `merge_conflict`, run `herd sync <id>` and ask the agent to resolve it with `herd send`.
 
 ## Commands
 
@@ -20,7 +50,7 @@ Run `herd --help` for the full list: `pick`, `spawn`, `wait`, `collect`, `send`,
 
 Inside a git repo every agent gets a worktree at `<repo-parent>/.herd-worktrees/<repo>/<id>`: `--write` agents on branch `herd/<id>`, read agents on a detached HEAD. Agents only edit files; herd commits their work when it integrates, syncs or discards. Each agent's brief is `.herd/<id>/brief.md` and its answer `.herd/<id>/report.json` inside its working directory; `.herd/` is added to the repo's `info/exclude`.
 
-Run `herd wait` in the background to start queued agents and receive `reported`, `blocked`, `stalled`, `long_running`, `invalid_report` and `exited` events. When an agent hits a rate limit, `wait` cools that provider down and requeues the task in the same worktree (`failed_over`), starting it when quota and a slot allow, or reports `rate_limited` when `auto_failover = false`. A typical write flow is `herd spawn --tier standard --task task.md --write --scope 'src/**'`, `wait`, `collect`, `diff`, `verify`, `integrate`, then `reap`. On `merge_conflict`, run `sync` and ask the agent to resolve the conflicts with `send`.
+Run `herd wait` in the background to start queued agents and receive `reported`, `blocked`, `stalled`, `long_running`, `invalid_report` and `exited` events. When an agent hits a rate limit, `wait` cools that provider down and requeues the task in the same worktree (`failed_over`), starting it when quota and a slot allow, or reports `rate_limited` when `auto_failover = false`.
 
 Worktrees start from committed HEAD; commit any changes the task needs before spawning. `spawn --cwd <dir>` selects the task directory and preserves its relative location inside the worktree. Outside git, read agents use that directory directly; write agents require a git repo. `--scope` supplies brief guidance and `diff` checks, so review `outOfScope` before integrating.
 
@@ -62,7 +92,7 @@ The e2e suite uses all three provider CLIs and skips outside Herdr (`HERDR_ENV=1
 
 ## Feature map
 
-Paths are relative to the repository root. Tests listed here exercise the feature; rows marked `-` have no dedicated test.
+For repository work, start with [AGENTS.md](AGENTS.md). Paths are relative to the repository root. Tests listed here exercise the feature; rows marked `-` have no dedicated test.
 
 | Feature / subsystem | Implementation | Tests |
 |---|---|---|
