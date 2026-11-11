@@ -34,8 +34,9 @@ export function decide(entry) {
 export async function run() {
   const anchor = anchorContext();
   const result = await withLedger(anchor, async (ledger) => {
+    const decisions = ledger.agents.map((entry) => [entry, decide(entry)]).filter(([, decision]) => decision);
     const recap = {};
-    if (ledger.agents.length) {
+    if (decisions.some(([, decision]) => decision.remove)) {
       try {
         const saved = await buildRecap({ anchor, ledger });
         recap.recap = saved.file;
@@ -47,9 +48,7 @@ export async function run() {
     const removed = [];
     const kept = [];
     const repos = new Set();
-    for (const entry of ledger.agents) {
-      const decision = decide(entry);
-      if (!decision) continue;
+    for (const [entry, decision] of decisions) {
       if (!decision.remove) {
         kept.push({ id: entry.id, state: entry.state, reason: decision.reason, age: age(entry.reportedAt ?? entry.started ?? entry.queued) });
         continue;
