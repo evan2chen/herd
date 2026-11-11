@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
 
 const style = readFileSync(new URL('./ui/style.css', import.meta.url), 'utf8');
-const app = readFileSync(new URL('./ui/app.js', import.meta.url), 'utf8');
+const scripts = ['helpers.js', 'charts.js', 'views.js', 'environments.js', 'app.js'];
+const app = `(() => {\n'use strict';\n${scripts.map(name =>
+  readFileSync(new URL(`./ui/${name}`, import.meta.url), 'utf8')
+).join('\n')}\n})();`;
 const views = ['overview', 'agents', 'timeline', 'context', 'environments', 'errors'];
 
 export function renderPage(run, { live = false } = {}) {

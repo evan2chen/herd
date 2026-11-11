@@ -51,7 +51,7 @@ body {
   font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace
 }
 
-button,input {
+button,input,select {
   font:inherit
 }
 
@@ -60,7 +60,7 @@ button {
   cursor:pointer
 }
 
-button:focus-visible,[tabindex]:focus-visible,summary:focus-visible {
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible,summary:focus-visible {
   outline:2px solid var(--blue);
   outline-offset:3px
 }
@@ -719,7 +719,7 @@ main {
   width:100%;
   border-collapse:collapse;
   table-layout:fixed;
-  min-width:560px
+  min-width:420px
 }
 
 .tree th {
@@ -735,8 +735,12 @@ main {
 }
 
 .tree th:first-child {
-  width:40%;
+  width:calc(100% - 270px);
   text-align:left
+}
+
+.tree th:nth-child(2),.tree th:nth-child(3) {
+  width:80px
 }
 
 .tree td {
@@ -753,6 +757,23 @@ main {
 
 .tree .file-name {
   padding-left:calc(12px + var(--depth)*14px)
+}
+
+.tree .file-name small {
+  display:block;
+  margin-left:5px
+}
+
+.tree th:last-child {
+  width:110px
+}
+
+.file-agents {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:8px 24px;
+  text-align:left;
+  padding:8px
 }
 
 .tree button {
@@ -897,6 +918,137 @@ main {
   color:var(--green)
 }
 
+input[type=search],select {
+  color:var(--text);
+  background:var(--mantle);
+  border:1px solid var(--border);
+  border-radius:3px;
+  padding:6px 8px;
+  min-width:0;
+  max-width:100%
+}
+
+.toolbar input[type=search] {
+  width:200px
+}
+
+.agent-controls {
+  padding:12px;
+  background:var(--mantle);
+  border:1px solid var(--border);
+  border-radius:4px
+}
+
+.toolbar select {
+  max-width:180px
+}
+
+.file-controls {
+  padding:12px 14px;
+  margin:0
+}
+
+.pagination {
+  justify-content:center;
+  margin:18px 0
+}
+
+button:disabled {
+  opacity:.45;
+  cursor:default
+}
+
+.group-toggle {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  width:100%;
+  text-align:left;
+  padding:12px 14px;
+  border:0;
+  border-radius:0;
+  overflow-wrap:anywhere
+}
+
+.flag-group+.flag-group,.error-cluster .group-toggle {
+  border-top:1px solid var(--surface)
+}
+
+.show-more,.details-toggle {
+  margin:12px 14px
+}
+
+.details-toggle {
+  margin:12px 0 0;
+  text-align:left
+}
+
+.ledger {
+  margin-top:18px
+}
+
+.help-text {
+  font-size:10px;
+  color:var(--muted);
+  margin-top:12px
+}
+
+.worktree-heading {
+  margin-top:24px
+}
+
+.diff-summary {
+  margin-top:10px
+}
+
+.compact .agent-task {
+  font-size:12px
+}
+
+.compact .activity {
+  margin:10px 0;
+  padding:6px 8px
+}
+
+.compact .panel-body {
+  padding:12px
+}
+
+.compact .cost {
+  font-size:20px
+}
+
+.compact .stats-pair {
+  gap:10px;
+  padding-bottom:0;
+  border:0
+}
+
+.timeline-grid.compact .lane svg {
+  height:46px
+}
+
+.timeline-grid.compact .lane-name {
+  padding:6px 12px
+}
+
+.axis {
+  padding-right:16px
+}
+
+.grid>*,.row>*,.panel-title>*,.stats-pair>*,.context-summary>* {
+  min-width:0
+}
+
+.panel-title,.agent-task,.row,.flag,.metric-value,.group-toggle {
+  overflow-wrap:anywhere
+}
+
+.badge {
+  flex-shrink:0
+}
+
 .activity {
   flex-wrap:wrap
 }
@@ -917,6 +1069,31 @@ main {
 }
 
 @media(max-width:700px) {
+  .agent-controls {
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    gap:8px
+  }
+  .agent-controls input[type=search],.agent-controls select {
+    width:100%;
+    max-width:none
+  }
+  .agent-controls>span {
+    overflow-wrap:anywhere
+  }
+  .stats-pair {
+    grid-template-columns:minmax(0,1fr);
+    gap:12px
+  }
+  .context-summary {
+    grid-template-columns:minmax(0,1fr) 90px
+  }
+  .histograms {
+    gap:12px
+  }
+  .timeline-grid .lane-name,.timeline-grid.compact .lane-name {
+    padding:6px
+  }
   .context-chart text,.context-chart .jump-label {
     font-size:17px
   }
