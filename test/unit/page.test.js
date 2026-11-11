@@ -36,7 +36,7 @@ test('embedded transcript text cannot close its script element', () => {
 function ui(snapshot = run, live = false) {
   const html = renderPage(snapshot, { live });
   const source = html.match(/<script>([\s\S]*?)<\/script>/)[1];
-  const startup = 'bindInteractions();\nrender();\nif (live) connectLive();';
+  const startup = /bindInteractions\(\);\r?\nrender\(\);\r?\nif \(live\) connectLive\(\);/;
   const exported = source.replace(startup, `globalThis.ui = {
     state, renderers, selectedAgents, pageItems, buildFileTree, currentPaths, validSnapshot,
     update: next => { run = next; }
