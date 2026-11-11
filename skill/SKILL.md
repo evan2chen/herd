@@ -38,6 +38,7 @@ Confirm `HERDR_ENV=1` first, and run `herd doctor` once per session. Run `herd <
 5. For each `reported` agent: `herd collect <id>`, then for write agents `herd diff <id>` and `herd verify <id>` when repo verify commands are configured. Read the diff and check verify output for `result: pass` before accepting the work.
 6. Accept with `herd integrate <id>`, give feedback with `herd send <id> "<what to change>"`, or reject with `herd discard <id>`.
 7. Finish with `herd reap`, then summarize for the user what was integrated, discarded or still open.
+   Tell the user the recap path printed by `reap` and offer `herd watch` for live viewing; never open either yourself.
 
 Run these commands from the same orchestrator pane; each pane has its own session ledger. By default, `wait` watches agents open when it starts, excluding agents that already reported, and returns on a report or actionable event. Supply IDs to watch specific agents. `wait --all` waits for all watched agents to settle, returning early for actionable events; `--timeout` bounds either mode. Run it again after handling an event.
 
@@ -86,4 +87,6 @@ Run these commands from the same orchestrator pane; each pane has its own sessio
 | `list [--all]` / `peek <id>` | Status and terminal tail |
 | `close <id>... \| --all` | Close panes and cancel queued agents |
 | `reap` / `reconcile` | Clean up finished worktrees; repair the ledger after crashes |
+| `recap [--out F]` | Save a self-contained HTML run recap |
+| `watch [--port N]` | Serve the live run dashboard until Ctrl+C |
 | `doctor` | Check Herdr, quota-axi, CLIs and model IDs |

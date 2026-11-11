@@ -11,12 +11,14 @@ import * as list from './commands/list.js';
 import * as peek from './commands/peek.js';
 import * as pick from './commands/pick.js';
 import * as reap from './commands/reap.js';
+import * as recap from './commands/recap.js';
 import * as reconcile from './commands/reconcile.js';
 import * as send from './commands/send.js';
 import * as spawn from './commands/spawn.js';
 import * as sync from './commands/sync.js';
 import * as verify from './commands/verify.js';
 import * as wait from './commands/wait.js';
+import * as watch from './commands/watch.js';
 import { EXIT, HerdError } from './errors.js';
 import { print, printError } from './output.js';
 
@@ -34,6 +36,8 @@ const COMMANDS = {
   discard,
   failover,
   reap,
+  recap,
+  watch,
   reconcile,
   list,
   peek,
