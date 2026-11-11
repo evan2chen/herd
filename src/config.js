@@ -17,6 +17,7 @@ export const DEFAULT_CONFIG = {
   rate_limit_cooldown_minutes: 15,
   auto_failover: true,
   notifications: true,
+  prices: {},
   repos: {},
   policy: {
     allow_commands: [
@@ -135,7 +136,7 @@ export function adapterFor(config, provider) {
 
 export function repoSettings(config, toplevel) {
   const key = Object.keys(config.repos).find((candidate) => samePath(candidate, toplevel));
-  return { verify: [], ...(key ? config.repos[key] : {}) };
+  return { verify: [], commands: {}, ...(key ? config.repos[key] : {}) };
 }
 
 export function launchArgs(adapter, model) {
