@@ -3,7 +3,10 @@ import { toolEvent } from './claude.js';
 
 export async function parseCursor(file, { offset = 0, state = {}, onEvent, ...options } = {}) {
   const events = [];
-  const emit = (event) => { if (onEvent) onEvent(event); else events.push(event); };
+  const emit = (event) => {
+    if (onEvent) onEvent(event);
+    else events.push(event);
+  };
   state.counter ??= 0;
   const next = await readJsonLines(file, offset, (r) => {
     for (const block of r.message?.content ?? []) {

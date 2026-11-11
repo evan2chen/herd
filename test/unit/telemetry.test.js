@@ -4,8 +4,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { analyzeShell, splitCommands, classifyCommand, errorSignature, filePath } from '../../src/telemetry/shell.js';
-import { parseClaude } from '../../src/telemetry/claude.js';
+import { analyzeShell, splitCommands, classifyCommand, errorSignature, filePath, hasErrorOutput, primaryCategory } from '../../src/telemetry/shell.js';
+import { parseClaude, toolEvent, resultEvent } from '../../src/telemetry/claude.js';
 import { parseCodex } from '../../src/telemetry/codex.js';
 import { parseCursor } from '../../src/telemetry/cursor.js';
 import { createAgent, foldEvent, foldRun, snapshotAgent } from '../../src/telemetry/fold.js';
@@ -170,4 +170,144 @@ test('config merges empty prices and repository command defaults', (t) => {
   t.after(() => { if (previous === undefined) delete process.env.HERD_HOME; else process.env.HERD_HOME = previous; });
   fs.writeFileSync(path.join(home, 'config.toml'), '[prices.test]\ninput = 1\ncached_input = 0.5\noutput = 2\n[repos."C:/repo".commands]\n"^custom" = "test"\n');
   const config = loadConfig(); assert.equal(config.prices.test.input, 1); assert.equal(repoSettings(config, 'C:/repo').commands['^custom'], 'test');
+});
+
+test('successful provider results detect soft errors and cluster distinct agents before frequency', async (t) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'herd-soft-errors-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const output = "Traceback (most recent call last):\n  File \"task.py\", line 1\n    read()\n"
+    + "UnicodeDecodeError: 'charmap' codec can't decode byte 0x8f";
+  const claude = path.join(dir, 'claude.jsonl');
+  const codex = path.join(dir, 'codex.jsonl');
+  const lines = [
+    { type: 'assistant', timestamp: start, message: { content: [
+      { type: 'tool_use', id: 'soft', name: 'Bash', input: { command: 'python task.py; echo done' } },
+    ] } },
+    { type: 'user', timestamp: end, message: { content: [
+      { type: 'tool_result', tool_use_id: 'soft', is_error: false, content: output },
+    ] }, toolUseResult: { exitCode: 0 } },
+  ];
+  fs.writeFileSync(claude, lines.map((line) => JSON.stringify(line)).join('\n') + '\n');
+  const records = [
+    { type: 'response_item', timestamp: start, payload: {
+      type: 'function_call', call_id: 'soft', name: 'exec_command', arguments: '{"cmd":"python task.py; echo done"}',
+    } },
+    { type: 'response_item', timestamp: end, payload: {
+      type: 'function_call_output', call_id: 'soft', output: JSON.stringify({ exit_code: 0, output }),
+    } },
+  ];
+  fs.writeFileSync(codex, records.map((record) => JSON.stringify(record)).join('\n') + '\n');
+  const events = (await parseClaude(claude)).events;
+  assert.equal(events.find((event) => event.type === 'tool_end').error, true);
+  assert.equal((await parseCodex(codex)).events.find((event) => event.type === 'tool_end').error, true);
+  const agents = Array.from({ length: 7 }, (_, i) => entry(`h${32 + i}`));
+  const accumulators = agents.map((agent) => reduce(agent, events));
+  for (let i = 0; i < 20; i += 1) {
+    foldEvent(accumulators[0], toolEvent(`other${i}`, 'Bash', { command: 'npm test' }, start));
+    foldEvent(accumulators[0], resultEvent(`other${i}`, end, 'Error: unrelated failure', true));
+  }
+  const run = foldRun({ anchor: 'test:p1', ledger: { agents }, accumulators });
+  assert.match(run.errorClusters[0].signature, /^UnicodeDecodeError:/);
+  assert.equal(run.errorClusters[0].agents.length, 7);
+  assert.equal(run.errorClusters[0].count, 7);
+  assert.equal(run.errorClusters[1].count, 20);
+});
+
+test('error output recognizes diagnostics while signatures reject code and generic wrappers', () => {
+  const diagnostics = [
+    'Traceback (most recent call last):', 'sh: tool: command not found',
+    'cat: missing.txt: No such file or directory', 'src/a.ts(1,2): error TS2304: Cannot find name',
+    'npm ERR! install failed', 'fatal: bad revision', 'Error: failed operation',
+  ];
+  for (const output of diagnostics) assert.equal(hasErrorOutput(output), true, output);
+  assert.equal(hasErrorOutput('PURPOSES = {"hook", "setup", "error"}'), false);
+  assert.equal(hasErrorOutput('const message = "Error: example";'), false);
+  assert.equal(hasErrorOutput('sys.exit(1 if failures else 0)'), false);
+  assert.equal(errorSignature('PURPOSES = {"hook", "setup", "error"}'), 'Command failed');
+  assert.equal(errorSignature("Exit code 1\nprint('failed')"), 'Command failed');
+  assert.equal(errorSignature('Command failed\nExit code 1\nError: specific failure'), 'Error: specific failure');
+  assert.equal(errorSignature('Error: Command failed\nNo such file or directory'), 'No such file or directory');
+});
+
+test('redirects omit descriptors and null devices while retaining real file writes', () => {
+  const command = 'cat src/a.ts 2>&1 > /dev/null; cat src/b.ts 2> &1 >NUL; cat src/c.ts > $null; cat src/d.ts 2>>errors.log';
+  const pieces = analyzeShell(command);
+  assert.deepEqual(pieces.flatMap((piece) => piece.written), ['errors.log']);
+  assert.deepEqual(pieces.flatMap((piece) => piece.read), ['src/a.ts', 'src/b.ts', 'src/c.ts', 'src/d.ts']);
+});
+
+test('shell calls use one primary category with full time and error while keeping piece paths', () => {
+  const command = '$render = 1; echo test; cd build; cat src/a.ts | head -n 2; npm test; npx remotion render Demo out.mp4 > logs/render.txt';
+  const call = toolEvent('chain', 'Bash', { command }, start);
+  assert.equal(primaryCategory(call.shell), 'render');
+  assert.equal(primaryCategory(analyzeShell('echo render; cd build; git status | grep test')), 'git');
+  assert.equal(primaryCategory(analyzeShell('git status | grep render')), 'git');
+  assert.equal(primaryCategory(analyzeShell('head src/a.ts')), 'read');
+  assert.equal(analyzeShell('cd C:/work', { worktree: 'C:/work' }).length, 1);
+  assert.equal(primaryCategory(analyzeShell('cd C:/work', { worktree: 'C:/work' })), 'other');
+  const acc = reduce(entry(), [call, resultEvent('chain', end, 'Error: render failed', false, 365)]);
+  const agent = snapshotAgent(acc);
+  assert.deepEqual(agent.shell, [{ category: 'render', count: 1, seconds: 365, errors: 1 }]);
+  assert.ok(agent.files.read.some((file) => file.path === 'src/a.ts'));
+  assert.ok(call.files.written.includes('logs/render.txt'));
+  assert.equal(agent.timeline.find((span) => span.kind === 'tool').category, 'render');
+  const priorities = ['render', 'test', 'build', 'install', 'script', 'git', 'edit', 'read', 'cleanup', 'other'];
+  for (let i = 0; i < priorities.length; i += 1) {
+    const pieces = priorities.slice(i).reverse().map((category) => ({ category, command: 'useful' }));
+    assert.equal(primaryCategory(pieces), priorities[i]);
+  }
+});
+
+test('generic failures stay counted without merging unrelated errors into a cluster', () => {
+  const agents = [entry('h1'), entry('h2')];
+  const events = [
+    toolEvent('generic', 'Bash', { command: 'custom' }, start),
+    resultEvent('generic', end, 'Exit code 1\nPURPOSES = {"hook", "error"}', true),
+  ];
+  const run = foldRun({ anchor: 'test:p1', ledger: { agents }, accumulators: agents.map((agent) => reduce(agent, events)) });
+  assert.equal(run.totals.errors, 2);
+  assert.deepEqual(run.errorClusters, []);
+});
+
+test('context jumps compare requests within their transcript and name the responsible tool', () => {
+  const agent = entry();
+  const acc = createAgent(agent);
+  foldEvent(acc, { type: 'context', at: start, id: 'one', size: 10000 }, { source: 'one' });
+  foldEvent(acc, { type: 'context', at: end, id: 'two', size: 100000 }, { source: 'two' });
+  let run = foldRun({ anchor: 'test:p1', ledger: { agents: [agent] }, accumulators: [acc] });
+  assert.equal(run.flags.some((flag) => flag.kind === 'context_growth'), false);
+  foldEvent(acc, toolEvent('read', 'Read', { file_path: 'src/a.ts' }, end), { source: 'one' });
+  foldEvent(acc, { type: 'context', at: end, id: 'three', size: 70000 }, { source: 'one' });
+  run = foldRun({ anchor: 'test:p1', ledger: { agents: [agent] }, accumulators: [acc] });
+  assert.match(run.flags.find((flag) => flag.kind === 'context_growth').message, /after Read src\/a.ts/);
+});
+
+test('flags cap duplicate reads and edit churn and require context pressure or a large jump', () => {
+  const agents = [entry('h1'), entry('h2'), entry('h3')];
+  const accumulators = agents.map((agent) => createAgent(agent));
+  for (const acc of accumulators) {
+    for (let i = 0; i < 12; i += 1) {
+      foldEvent(acc, { type: 'file', path: `src/file${i}.ts`, operation: 'read' });
+      for (let j = 0; j < i + 1; j += 1) foldEvent(acc, { type: 'file', path: `src/file${i}.ts`, operation: 'written' });
+    }
+    foldEvent(acc, { type: 'context', id: 'first', at: start, size: 30000 });
+    foldEvent(acc, { type: 'context', id: 'second', at: end, size: 65000 });
+  }
+  accumulators[0].readTokens.set('src/file4.ts', 9000);
+  const run = foldRun({ anchor: 'test:p1', ledger: { agents }, accumulators });
+  assert.equal(run.flags.filter((flag) => flag.kind === 'duplicate_reads').length, 10);
+  assert.match(run.flags.find((flag) => flag.kind === 'duplicate_reads').message, /^src\/file4.ts/);
+  assert.equal(run.flags.filter((flag) => flag.kind === 'edit_churn').length, 10);
+  assert.match(run.flags.find((flag) => flag.kind === 'edit_churn').message, /written 12 times/);
+  assert.equal(run.flags.some((flag) => flag.kind === 'context_growth'), false);
+  foldEvent(accumulators[0], { type: 'context', id: 'third', at: '2026-11-01T00:00:21.000Z', size: 116000 });
+  foldEvent(accumulators[1], { type: 'context', id: 'third', at: '2026-11-01T00:00:21.000Z', size: 71000, window: 100000 });
+  const updated = foldRun({ anchor: 'test:p1', ledger: { agents }, accumulators });
+  const growth = updated.flags.filter((flag) => flag.kind === 'context_growth');
+  assert.equal(growth.length, 2);
+  assert.ok(growth.every((flag) => flag.message.includes('after request context')));
+  assert.ok(growth.some((flag) => flag.message.includes('51000')));
+  assert.ok(growth.some((flag) => flag.message.includes('70%')));
+  assert.equal(updated.flags.slice(updated.flags.findIndex((flag) => flag.severity === 'info'))
+    .every((flag) => flag.severity === 'info'), true);
 });
