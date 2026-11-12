@@ -46,7 +46,7 @@ herd reap
 
 ## Commands
 
-Run `herd --help` for the full list: `pick`, `spawn`, `wait`, `collect`, `send`, `keys`, `diff`, `verify`, `integrate`, `sync`, `discard`, `failover`, `reap`, `reconcile`, `list`, `peek`, `close` and `doctor`.
+Run `herd --help` for the full list: `pick`, `spawn`, `wait`, `collect`, `send`, `keys`, `diff`, `verify`, `integrate`, `sync`, `discard`, `failover`, `reap`, `recap`, `watch`, `reconcile`, `list`, `peek`, `close` and `doctor`.
 
 Inside a git repo every agent gets a worktree at `<repo-parent>/.herd-worktrees/<repo>/<id>`: `--write` agents on branch `herd/<id>`, read agents on a detached HEAD. Agents only edit files; herd commits their work when it integrates, syncs or discards. Each agent's brief is `.herd/<id>/brief.md` and its answer `.herd/<id>/report.json` inside its working directory; `.herd/` is added to the repo's `info/exclude`.
 
@@ -57,6 +57,8 @@ Worktrees start from committed HEAD; commit any changes the task needs before sp
 The `[policy]` command lists become a generated `--settings` file for Claude and, inside a worktree, a `.cursor/cli.json` for Cursor (kept out of commits); repo verify commands are added to those allow lists. Codex uses its workspace-write sandbox with approval on request.
 
 `verify` requires repo commands configured below; its output reports `result` as `pass` or `fail`. `integrate` requires a clean target checkout and a settled write agent; review and verification are orchestrator steps. `close` preserves worktrees; `reap` removes integrated, discarded and finished read worktrees, retaining write work that still needs a decision. `reconcile` repairs missing-pane/worktree ledger entries and lists orphan worktrees for review.
+
+`recap [--out <file>]` saves a self-contained HTML report of agent costs, tokens, activity, context, files and shared errors under `<sessionDir>/recaps/<timestamp>.html`. `reap` saves one before cleanup when the session has agents. `watch [--port <n>]` serves the same views live on localhost, polling only while viewers are connected. Both print their location; open it in a browser yourself, and press Ctrl+C to stop `watch`.
 
 ## Configuration
 
@@ -75,7 +77,17 @@ startup_prompts = [{ match = "Yes, I trust this folder", keys = ["down", "enter"
 
 [repos."C:/Users/Evan/Documents/Code/app"]
 verify = ["npm test", "npm run lint"]
+
+[repos."C:/Users/Evan/Documents/Code/app".commands]
+"^npm run check" = "test"
+
+[prices."model-id"]
+input = 2
+cached_input = 0.5
+output = 10
 ```
+
+`[prices.<model>]` sets USD per million input, cached input and output tokens; models without a price show no USD estimate. `[repos."<path>".commands]` maps command regexes to shell categories such as `test`, `build` or `read`.
 
 Automatic routing requires known quota for both `all_models` and the tier's model scope, at or above `cutoff_percent`, and skips providers in cooldown. It ranks by spend priority, then remaining percent, then configured provider order. `spawn --provider` and `failover --provider` force a configured provider, bypassing quota, cooldown and avoidance checks. With no eligible provider, tasks queue until the earliest known reset or a 15-minute retry; `wait` drains the queue.
 
@@ -117,5 +129,6 @@ For repository work, start with [AGENTS.md](AGENTS.md). Paths are relative to th
 | Provider command permissions and generated settings | `src/policy.js`, `src/config.js` | - |
 | Session ledger, locking and runtime paths | `src/ledger.js`, `src/paths.js` | `test/e2e/results.test.js`, `test/e2e/worktree.test.js` |
 | Lifecycle usage logging | `src/usage.js` | `test/e2e/failover.test.js` |
+| Run recaps and live dashboard (`recap`, `watch`) | `src/telemetry/`, `src/commands/recap.js`, `src/commands/watch.js` | `test/unit/telemetry.test.js`, `test/unit/page.test.js`, `test/unit/recap.test.js` |
 | Orchestrator workflow skill | `skill/SKILL.md` | - |
 | Test scripts and live Herdr harness | `package.json`, `test/e2e/harness.js` | `test/unit/`, `test/e2e/` |

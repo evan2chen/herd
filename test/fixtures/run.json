@@ -1,0 +1,1223 @@
+{
+  "version": 1,
+  "session": "wJ:p1",
+  "repo": "C:/work/atlas",
+  "live": true,
+  "generatedAt": "2026-11-11T14:15:00.000Z",
+  "window": {
+    "start": "2026-11-11T14:00:00.000Z",
+    "end": "2026-11-11T14:15:00.000Z"
+  },
+  "totals": {
+    "agents": 4,
+    "toolCalls": 111,
+    "errors": 5,
+    "wallSeconds": 900,
+    "costUsd": 3.12,
+    "costExact": false,
+    "tokens": {
+      "input": 147000,
+      "output": 36900,
+      "cacheRead": 429000,
+      "cacheWrite": 30000
+    }
+  },
+  "quota": [
+    {
+      "provider": "claude",
+      "startPercent": 42,
+      "endPercent": 38.1
+    },
+    {
+      "provider": "codex",
+      "startPercent": 73,
+      "endPercent": 67.5
+    },
+    {
+      "provider": "cursor",
+      "startPercent": null,
+      "endPercent": null
+    }
+  ],
+  "agents": [
+    {
+      "id": "h1-api",
+      "task": "Build the event ingestion API",
+      "tier": "standard",
+      "mode": "write",
+      "provider": "claude",
+      "model": "claude-sonnet-4-6",
+      "state": "running",
+      "activity": {
+        "kind": "tool",
+        "label": "Edit src/api/events.ts",
+        "since": "2026-11-11T14:14:00.000Z"
+      },
+      "worktree": "C:/work/.herd-worktrees/atlas/h1-api",
+      "branch": "herd/h1-api",
+      "base": "b43d9a1",
+      "scope": [
+        "src/**",
+        "test/**"
+      ],
+      "queued": "2026-11-11T14:00:00.000Z",
+      "started": "2026-11-11T14:00:08.000Z",
+      "ended": null,
+      "rounds": 2,
+      "segments": [
+        {
+          "provider": "claude",
+          "model": "claude-sonnet-4-6",
+          "transcript": "C:/transcripts/h1-api.jsonl",
+          "started": "2026-11-11T14:00:08.000Z",
+          "ended": null
+        }
+      ],
+      "cost": {
+        "usd": 1.84,
+        "exact": true,
+        "quotaPercent": 2.1
+      },
+      "tokens": {
+        "input": 48200,
+        "output": 12300,
+        "cacheRead": 156000,
+        "cacheWrite": 18000,
+        "exact": true
+      },
+      "context": {
+        "window": 200000,
+        "peak": 118400,
+        "series": [
+          {
+            "at": "2026-11-11T14:00:08.000Z",
+            "size": 18000,
+            "own": 0,
+            "tool": 0,
+            "cause": "Initial brief and instructions"
+          },
+          {
+            "at": "2026-11-11T14:01:10.000Z",
+            "size": 26100,
+            "own": 2100,
+            "tool": 6000,
+            "cause": "Read src/api/router.ts"
+          },
+          {
+            "at": "2026-11-11T14:03:30.000Z",
+            "size": 37800,
+            "own": 3200,
+            "tool": 8500,
+            "cause": "Read test/api/events.test.ts"
+          },
+          {
+            "at": "2026-11-11T14:07:00.000Z",
+            "size": 103400,
+            "own": 3600,
+            "tool": 62000,
+            "cause": "Bash:read generated/schema.json (saved oversized output)"
+          },
+          {
+            "at": "2026-11-11T14:11:40.000Z",
+            "size": 118400,
+            "own": 5000,
+            "tool": 10000,
+            "cause": "Bash:test npm test"
+          },
+          {
+            "at": "2026-11-11T14:14:00.000Z",
+            "size": 84200,
+            "own": 1800,
+            "tool": -36000,
+            "cause": "Context compaction"
+          }
+        ]
+      },
+      "time": {
+        "model": 420,
+        "tool": 352,
+        "background": 290,
+        "idle": 120,
+        "blocked": 0,
+        "queued": 8
+      },
+      "tools": [
+        {
+          "name": "Read",
+          "count": 18,
+          "seconds": 50,
+          "errors": 0
+        },
+        {
+          "name": "Edit",
+          "count": 12,
+          "seconds": 110,
+          "errors": 0
+        },
+        {
+          "name": "Bash",
+          "count": 9,
+          "seconds": 192,
+          "errors": 1
+        }
+      ],
+      "shell": [
+        {
+          "category": "test",
+          "count": 4,
+          "seconds": 135,
+          "errors": 1
+        },
+        {
+          "category": "read",
+          "count": 3,
+          "seconds": 27,
+          "errors": 0
+        },
+        {
+          "category": "git",
+          "count": 2,
+          "seconds": 30,
+          "errors": 0
+        }
+      ],
+      "timeline": [
+        {
+          "kind": "queued",
+          "start": "2026-11-11T14:00:00.000Z",
+          "end": "2026-11-11T14:00:08.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Waiting for pane"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:00:08.000Z",
+          "end": "2026-11-11T14:01:10.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Plan API"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:01:10.000Z",
+          "end": "2026-11-11T14:02:00.000Z",
+          "tool": "Read",
+          "category": "read",
+          "label": "Read router"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:02:00.000Z",
+          "end": "2026-11-11T14:03:30.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Design event schema"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:03:30.000Z",
+          "end": "2026-11-11T14:05:00.000Z",
+          "tool": "Edit",
+          "category": "edit",
+          "label": "Edit src/api/events.ts"
+        },
+        {
+          "kind": "background",
+          "start": "2026-11-11T14:04:10.000Z",
+          "end": "2026-11-11T14:09:00.000Z",
+          "tool": "Bash",
+          "category": "test",
+          "label": "npm run test:integration"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:05:00.000Z",
+          "end": "2026-11-11T14:07:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Implement validation"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:07:00.000Z",
+          "end": "2026-11-11T14:08:20.000Z",
+          "tool": "Bash",
+          "category": "read",
+          "label": "Read generated/schema.json"
+        },
+        {
+          "kind": "idle",
+          "start": "2026-11-11T14:08:20.000Z",
+          "end": "2026-11-11T14:10:20.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Waiting for orchestrator"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:10:20.000Z",
+          "end": "2026-11-11T14:11:40.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Address review feedback"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:11:40.000Z",
+          "end": "2026-11-11T14:12:52.000Z",
+          "tool": "Bash",
+          "category": "test",
+          "label": "npm test"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:12:52.000Z",
+          "end": "2026-11-11T14:14:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Compact and revise"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:14:00.000Z",
+          "end": "2026-11-11T14:15:00.000Z",
+          "tool": "Edit",
+          "category": "edit",
+          "label": "Edit src/api/events.ts"
+        }
+      ],
+      "prompts": [
+        "2026-11-11T14:00:00.000Z",
+        "2026-11-11T14:10:20.000Z"
+      ],
+      "files": {
+        "read": [
+          {
+            "path": "src/api/events.ts",
+            "count": 5
+          },
+          {
+            "path": "src/api/router.ts",
+            "count": 3
+          },
+          {
+            "path": "src/shared/types.ts",
+            "count": 4
+          },
+          {
+            "path": "generated/schema.json",
+            "count": 1
+          },
+          {
+            "path": "test/api/events.test.ts",
+            "count": 5
+          }
+        ],
+        "written": [
+          {
+            "path": "src/api/events.ts",
+            "count": 8
+          },
+          {
+            "path": "src/shared/types.ts",
+            "count": 4
+          }
+        ]
+      },
+      "diff": {
+        "files": 2,
+        "added": 184,
+        "removed": 23,
+        "outOfScope": []
+      },
+      "errors": 1
+    },
+    {
+      "id": "h2-dashboard",
+      "task": "Build the run dashboard",
+      "tier": "standard",
+      "mode": "write",
+      "provider": "codex",
+      "model": "gpt-6.1",
+      "state": "running",
+      "activity": {
+        "kind": "blocked",
+        "label": "Permission needed: install browser binaries",
+        "since": "2026-11-11T14:13:00.000Z"
+      },
+      "worktree": "C:/work/.herd-worktrees/atlas/h2-dashboard",
+      "branch": "herd/h2-dashboard",
+      "base": "b43d9a1",
+      "scope": [
+        "src/**",
+        "test/**"
+      ],
+      "queued": "2026-11-11T14:00:00.000Z",
+      "started": "2026-11-11T14:00:08.000Z",
+      "ended": null,
+      "rounds": 1,
+      "segments": [
+        {
+          "provider": "codex",
+          "model": "gpt-6.1",
+          "transcript": "C:/transcripts/h2-dashboard.jsonl",
+          "started": "2026-11-11T14:00:08.000Z",
+          "ended": null
+        }
+      ],
+      "cost": {
+        "usd": null,
+        "exact": false,
+        "quotaPercent": 3.7
+      },
+      "tokens": {
+        "input": 66400,
+        "output": 16200,
+        "cacheRead": 212000,
+        "cacheWrite": 0,
+        "exact": true
+      },
+      "context": {
+        "window": 272000,
+        "peak": 134600,
+        "series": [
+          {
+            "at": "2026-11-11T14:00:08.000Z",
+            "size": 22000,
+            "own": 0,
+            "tool": 0,
+            "cause": "Initial brief"
+          },
+          {
+            "at": "2026-11-11T14:02:00.000Z",
+            "size": 35400,
+            "own": 2400,
+            "tool": 11000,
+            "cause": "Read src/shared/types.ts"
+          },
+          {
+            "at": "2026-11-11T14:05:00.000Z",
+            "size": 63800,
+            "own": 5400,
+            "tool": 23000,
+            "cause": "exec_command:read existing dashboard components"
+          },
+          {
+            "at": "2026-11-11T14:09:00.000Z",
+            "size": 98600,
+            "own": 8800,
+            "tool": 26000,
+            "cause": "exec_command:test npm test"
+          },
+          {
+            "at": "2026-11-11T14:13:00.000Z",
+            "size": 134600,
+            "own": 6000,
+            "tool": 30000,
+            "cause": "exec_command:install browser verification dependencies"
+          }
+        ]
+      },
+      "time": {
+        "model": 462,
+        "tool": 310,
+        "background": 180,
+        "idle": 0,
+        "blocked": 120,
+        "queued": 8
+      },
+      "tools": [
+        {
+          "name": "exec_command",
+          "count": 22,
+          "seconds": 240,
+          "errors": 2
+        },
+        {
+          "name": "apply_patch",
+          "count": 15,
+          "seconds": 70,
+          "errors": 0
+        }
+      ],
+      "shell": [
+        {
+          "category": "read",
+          "count": 10,
+          "seconds": 52,
+          "errors": 0
+        },
+        {
+          "category": "test",
+          "count": 6,
+          "seconds": 120,
+          "errors": 1
+        },
+        {
+          "category": "build",
+          "count": 3,
+          "seconds": 45,
+          "errors": 0
+        },
+        {
+          "category": "install",
+          "count": 1,
+          "seconds": 15,
+          "errors": 1
+        },
+        {
+          "category": "git",
+          "count": 2,
+          "seconds": 8,
+          "errors": 0
+        }
+      ],
+      "timeline": [
+        {
+          "kind": "queued",
+          "start": "2026-11-11T14:00:00.000Z",
+          "end": "2026-11-11T14:00:08.000Z",
+          "tool": null,
+          "category": null,
+          "label": null
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:00:08.000Z",
+          "end": "2026-11-11T14:02:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Plan views"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:02:00.000Z",
+          "end": "2026-11-11T14:03:00.000Z",
+          "tool": "exec_command",
+          "category": "read",
+          "label": "Read components"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:03:00.000Z",
+          "end": "2026-11-11T14:05:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Design panels"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:05:00.000Z",
+          "end": "2026-11-11T14:07:00.000Z",
+          "tool": "apply_patch",
+          "category": "edit",
+          "label": "Edit src/ui/dashboard.ts"
+        },
+        {
+          "kind": "background",
+          "start": "2026-11-11T14:06:00.000Z",
+          "end": "2026-11-11T14:09:00.000Z",
+          "tool": "exec_command",
+          "category": "build",
+          "label": "npm run build"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:07:00.000Z",
+          "end": "2026-11-11T14:09:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Wire live updates"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:09:00.000Z",
+          "end": "2026-11-11T14:10:20.000Z",
+          "tool": "exec_command",
+          "category": "test",
+          "label": "npm test"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:10:20.000Z",
+          "end": "2026-11-11T14:12:10.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Prepare browser checks"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:12:10.000Z",
+          "end": "2026-11-11T14:13:00.000Z",
+          "tool": "exec_command",
+          "category": "install",
+          "label": "Install browser binaries"
+        },
+        {
+          "kind": "blocked",
+          "start": "2026-11-11T14:13:00.000Z",
+          "end": "2026-11-11T14:15:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Permission needed: install browser binaries"
+        }
+      ],
+      "prompts": [
+        "2026-11-11T14:00:00.000Z"
+      ],
+      "files": {
+        "read": [
+          {
+            "path": "src/ui/dashboard.ts",
+            "count": 8
+          },
+          {
+            "path": "src/shared/types.ts",
+            "count": 5
+          },
+          {
+            "path": "src/ui/theme.css",
+            "count": 3
+          }
+        ],
+        "written": [
+          {
+            "path": "src/ui/dashboard.ts",
+            "count": 11
+          },
+          {
+            "path": "src/ui/theme.css",
+            "count": 3
+          },
+          {
+            "path": "src/shared/types.ts",
+            "count": 1
+          }
+        ]
+      },
+      "diff": {
+        "files": 3,
+        "added": 342,
+        "removed": 48,
+        "outOfScope": []
+      },
+      "errors": 2
+    },
+    {
+      "id": "h3-review",
+      "task": "Review event contracts and test coverage",
+      "tier": "fast",
+      "mode": "read",
+      "provider": "cursor",
+      "model": "composer-2.5",
+      "state": "reported",
+      "activity": {
+        "kind": "done",
+        "label": "Review submitted",
+        "since": "2026-11-11T14:11:00.000Z"
+      },
+      "worktree": null,
+      "branch": null,
+      "base": "b43d9a1",
+      "scope": [
+        "src/**",
+        "test/**"
+      ],
+      "queued": "2026-11-11T14:00:30.000Z",
+      "started": "2026-11-11T14:00:45.000Z",
+      "ended": "2026-11-11T14:11:00.000Z",
+      "rounds": 1,
+      "segments": [
+        {
+          "provider": "cursor",
+          "model": "composer-2.5",
+          "transcript": null,
+          "started": "2026-11-11T14:00:45.000Z",
+          "ended": "2026-11-11T14:11:00.000Z"
+        }
+      ],
+      "cost": {
+        "usd": 0.32,
+        "exact": false,
+        "quotaPercent": null
+      },
+      "tokens": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "exact": false
+      },
+      "context": {
+        "window": null,
+        "peak": null,
+        "series": []
+      },
+      "time": {
+        "model": 615,
+        "tool": 0,
+        "background": 0,
+        "idle": 0,
+        "blocked": 0,
+        "queued": 15
+      },
+      "tools": [
+        {
+          "name": "Read",
+          "count": 14,
+          "seconds": null,
+          "errors": 0
+        }
+      ],
+      "shell": [],
+      "timeline": [
+        {
+          "kind": "queued",
+          "start": "2026-11-11T14:00:30.000Z",
+          "end": "2026-11-11T14:00:45.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Waiting for review slot"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:00:45.000Z",
+          "end": "2026-11-11T14:11:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Lifecycle interval only; provider timestamps unavailable"
+        }
+      ],
+      "prompts": [
+        "2026-11-11T14:00:30.000Z"
+      ],
+      "files": {
+        "read": [
+          {
+            "path": "src/api/events.ts",
+            "count": 4
+          },
+          {
+            "path": "src/shared/types.ts",
+            "count": 6
+          },
+          {
+            "path": "test/api/events.test.ts",
+            "count": 4
+          }
+        ],
+        "written": []
+      },
+      "diff": null,
+      "errors": 0
+    },
+    {
+      "id": "h4-tests",
+      "task": "Add ingestion integration tests",
+      "tier": "standard",
+      "mode": "write",
+      "provider": "codex",
+      "model": "gpt-6.1",
+      "state": "running",
+      "activity": {
+        "kind": "background",
+        "label": "npm test test/integration/events.test.ts",
+        "since": "2026-11-11T14:13:30.000Z"
+      },
+      "worktree": "C:/work/.herd-worktrees/atlas/h4-tests",
+      "branch": "herd/h4-tests",
+      "base": "b43d9a1",
+      "scope": [
+        "src/**",
+        "test/**"
+      ],
+      "queued": "2026-11-11T14:00:00.000Z",
+      "started": "2026-11-11T14:00:08.000Z",
+      "ended": null,
+      "rounds": 1,
+      "segments": [
+        {
+          "provider": "claude",
+          "model": "claude-sonnet-4-6",
+          "transcript": "C:/transcripts/h4-claude.jsonl",
+          "started": "2026-11-11T14:00:08.000Z",
+          "ended": "2026-11-11T14:06:00.000Z"
+        },
+        {
+          "provider": "codex",
+          "model": "gpt-6.1",
+          "transcript": "C:/transcripts/h4-codex.jsonl",
+          "started": "2026-11-11T14:07:00.000Z",
+          "ended": null
+        }
+      ],
+      "cost": {
+        "usd": 0.96,
+        "exact": false,
+        "quotaPercent": 1.8
+      },
+      "tokens": {
+        "input": 32400,
+        "output": 8400,
+        "cacheRead": 61000,
+        "cacheWrite": 12000,
+        "exact": false
+      },
+      "context": {
+        "window": 272000,
+        "peak": 78200,
+        "series": [
+          {
+            "at": "2026-11-11T14:00:08.000Z",
+            "size": 16000,
+            "own": 0,
+            "tool": 0,
+            "cause": "Initial brief"
+          },
+          {
+            "at": "2026-11-11T14:02:40.000Z",
+            "size": 38400,
+            "own": 2400,
+            "tool": 20000,
+            "cause": "Read integration fixtures"
+          },
+          {
+            "at": "2026-11-11T14:05:00.000Z",
+            "size": 52600,
+            "own": 4200,
+            "tool": 10000,
+            "cause": "Bash:test npm test"
+          },
+          {
+            "at": "2026-11-11T14:07:00.000Z",
+            "size": 24000,
+            "own": 0,
+            "tool": -28600,
+            "cause": "Provider failover: Claude to Codex"
+          },
+          {
+            "at": "2026-11-11T14:10:00.000Z",
+            "size": 52800,
+            "own": 4800,
+            "tool": 24000,
+            "cause": "exec_command:read prior test failures"
+          },
+          {
+            "at": "2026-11-11T14:13:30.000Z",
+            "size": 78200,
+            "own": 5400,
+            "tool": 20000,
+            "cause": "exec_command:test integration output"
+          }
+        ]
+      },
+      "time": {
+        "model": 672,
+        "tool": 160,
+        "background": 90,
+        "idle": 0,
+        "blocked": 0,
+        "queued": 68
+      },
+      "tools": [
+        {
+          "name": "Bash",
+          "count": 6,
+          "seconds": 70,
+          "errors": 1
+        },
+        {
+          "name": "exec_command",
+          "count": 8,
+          "seconds": 90,
+          "errors": 1
+        },
+        {
+          "name": "apply_patch",
+          "count": 7,
+          "seconds": 20,
+          "errors": 0
+        }
+      ],
+      "shell": [
+        {
+          "category": "test",
+          "count": 9,
+          "seconds": 130,
+          "errors": 1
+        },
+        {
+          "category": "read",
+          "count": 3,
+          "seconds": 20,
+          "errors": 0
+        },
+        {
+          "category": "git",
+          "count": 2,
+          "seconds": 10,
+          "errors": 0
+        }
+      ],
+      "timeline": [
+        {
+          "kind": "queued",
+          "start": "2026-11-11T14:00:00.000Z",
+          "end": "2026-11-11T14:00:08.000Z",
+          "tool": null,
+          "category": null,
+          "label": null
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:00:08.000Z",
+          "end": "2026-11-11T14:02:40.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Design integration cases"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:02:40.000Z",
+          "end": "2026-11-11T14:03:40.000Z",
+          "tool": "Read",
+          "category": "read",
+          "label": "Read fixtures"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:03:40.000Z",
+          "end": "2026-11-11T14:05:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Build test harness"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:05:00.000Z",
+          "end": "2026-11-11T14:05:30.000Z",
+          "tool": "Bash",
+          "category": "test",
+          "label": "npm test"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:05:30.000Z",
+          "end": "2026-11-11T14:06:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Provider quota exhausted"
+        },
+        {
+          "kind": "queued",
+          "start": "2026-11-11T14:06:00.000Z",
+          "end": "2026-11-11T14:07:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Failover: waiting for Codex"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:07:00.000Z",
+          "end": "2026-11-11T14:10:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Resume with Codex"
+        },
+        {
+          "kind": "tool",
+          "start": "2026-11-11T14:10:00.000Z",
+          "end": "2026-11-11T14:11:10.000Z",
+          "tool": "apply_patch",
+          "category": "edit",
+          "label": "Edit test/integration/events.test.ts"
+        },
+        {
+          "kind": "model",
+          "start": "2026-11-11T14:11:10.000Z",
+          "end": "2026-11-11T14:15:00.000Z",
+          "tool": null,
+          "category": null,
+          "label": "Review results while tests run"
+        },
+        {
+          "kind": "background",
+          "start": "2026-11-11T14:13:30.000Z",
+          "end": "2026-11-11T14:15:00.000Z",
+          "tool": "exec_command",
+          "category": "test",
+          "label": "npm test test/integration/events.test.ts"
+        }
+      ],
+      "prompts": [
+        "2026-11-11T14:00:00.000Z",
+        "2026-11-11T14:07:00.000Z"
+      ],
+      "files": {
+        "read": [
+          {
+            "path": "src/api/events.ts",
+            "count": 3
+          },
+          {
+            "path": "test/integration/events.test.ts",
+            "count": 6
+          },
+          {
+            "path": "test/fixtures/events.json",
+            "count": 3
+          }
+        ],
+        "written": [
+          {
+            "path": "test/integration/events.test.ts",
+            "count": 6
+          },
+          {
+            "path": "test/fixtures/events.json",
+            "count": 2
+          },
+          {
+            "path": "package.json",
+            "count": 1
+          }
+        ]
+      },
+      "diff": {
+        "files": 3,
+        "added": 209,
+        "removed": 12,
+        "outOfScope": [
+          "package.json"
+        ]
+      },
+      "errors": 2
+    }
+  ],
+  "files": [
+    {
+      "path": "src/api/events.ts",
+      "agents": {
+        "h1-api": {
+          "reads": 5,
+          "writes": 8
+        },
+        "h3-review": {
+          "reads": 4,
+          "writes": 0
+        },
+        "h4-tests": {
+          "reads": 3,
+          "writes": 0
+        }
+      }
+    },
+    {
+      "path": "src/api/router.ts",
+      "agents": {
+        "h1-api": {
+          "reads": 3,
+          "writes": 0
+        }
+      }
+    },
+    {
+      "path": "src/shared/types.ts",
+      "agents": {
+        "h1-api": {
+          "reads": 4,
+          "writes": 4
+        },
+        "h2-dashboard": {
+          "reads": 5,
+          "writes": 1
+        },
+        "h3-review": {
+          "reads": 6,
+          "writes": 0
+        }
+      }
+    },
+    {
+      "path": "generated/schema.json",
+      "agents": {
+        "h1-api": {
+          "reads": 1,
+          "writes": 0
+        }
+      }
+    },
+    {
+      "path": "test/api/events.test.ts",
+      "agents": {
+        "h1-api": {
+          "reads": 5,
+          "writes": 0
+        },
+        "h3-review": {
+          "reads": 4,
+          "writes": 0
+        }
+      }
+    },
+    {
+      "path": "src/ui/dashboard.ts",
+      "agents": {
+        "h2-dashboard": {
+          "reads": 8,
+          "writes": 11
+        }
+      }
+    },
+    {
+      "path": "src/ui/theme.css",
+      "agents": {
+        "h2-dashboard": {
+          "reads": 3,
+          "writes": 3
+        }
+      }
+    },
+    {
+      "path": "test/integration/events.test.ts",
+      "agents": {
+        "h4-tests": {
+          "reads": 6,
+          "writes": 6
+        }
+      }
+    },
+    {
+      "path": "test/fixtures/events.json",
+      "agents": {
+        "h4-tests": {
+          "reads": 3,
+          "writes": 2
+        }
+      }
+    },
+    {
+      "path": "package.json",
+      "agents": {
+        "h4-tests": {
+          "reads": 0,
+          "writes": 1
+        }
+      }
+    }
+  ],
+  "errorClusters": [
+    {
+      "signature": "ERR_MODULE_NOT_FOUND: @atlas/events",
+      "family": "module-resolution",
+      "count": 3,
+      "agents": [
+        {
+          "id": "h1-api",
+          "at": "2026-11-11T14:11:50.000Z",
+          "recovery": "Updated the workspace import and reran the API suite successfully."
+        },
+        {
+          "id": "h2-dashboard",
+          "at": "2026-11-11T14:09:20.000Z",
+          "recovery": "Aligned the UI import with the shared package export."
+        },
+        {
+          "id": "h4-tests",
+          "at": "2026-11-11T14:05:10.000Z",
+          "recovery": "Added the missing package export before retrying integration tests."
+        }
+      ]
+    },
+    {
+      "signature": "Permission denied: browser cache installation",
+      "family": "permission",
+      "count": 1,
+      "agents": [
+        {
+          "id": "h2-dashboard",
+          "at": "2026-11-11T14:13:00.000Z",
+          "recovery": null
+        }
+      ]
+    },
+    {
+      "signature": "Provider usage limit reached",
+      "family": "rate-limit",
+      "count": 1,
+      "agents": [
+        {
+          "id": "h4-tests",
+          "at": "2026-11-11T14:06:00.000Z",
+          "recovery": "Resumed on Codex at 14:07:00 with the existing worktree."
+        }
+      ]
+    }
+  ],
+  "flags": [
+    {
+      "kind": "overlapping_writes",
+      "severity": "error",
+      "agent": "h2-dashboard",
+      "at": "2026-11-11T14:07:00.000Z",
+      "message": "Two agents wrote src/shared/types.ts. Review the shared contract before integrating."
+    },
+    {
+      "kind": "permission_block",
+      "severity": "warn",
+      "agent": "h2-dashboard",
+      "at": "2026-11-11T14:13:00.000Z",
+      "message": "Browser verification is waiting for install permission."
+    },
+    {
+      "kind": "shared_error",
+      "severity": "warn",
+      "agent": null,
+      "at": "2026-11-11T14:11:50.000Z",
+      "message": "Three agents hit the same missing @atlas/events export."
+    },
+    {
+      "kind": "context_growth",
+      "severity": "warn",
+      "agent": "h1-api",
+      "at": "2026-11-11T14:07:00.000Z",
+      "message": "Context grew by 65.6k tokens; generated schema output contributed 62k."
+    },
+    {
+      "kind": "idle",
+      "severity": "info",
+      "agent": "h1-api",
+      "at": "2026-11-11T14:08:20.000Z",
+      "message": "API agent waited 2m for review feedback."
+    },
+    {
+      "kind": "compaction",
+      "severity": "info",
+      "agent": "h1-api",
+      "at": "2026-11-11T14:14:00.000Z",
+      "message": "Context dropped from 118.4k to 84.2k after compaction."
+    },
+    {
+      "kind": "duplicate_reads",
+      "severity": "info",
+      "agent": "h3-review",
+      "at": "2026-11-11T14:11:00.000Z",
+      "message": "Shared types were read by three agents."
+    },
+    {
+      "kind": "fix_loop",
+      "severity": "warn",
+      "agent": "h4-tests",
+      "at": "2026-11-11T14:10:00.000Z",
+      "message": "Integration tests required repeated module resolution fixes."
+    },
+    {
+      "kind": "edit_churn",
+      "severity": "info",
+      "agent": "h2-dashboard",
+      "at": "2026-11-11T14:12:10.000Z",
+      "message": "Dashboard implementation revised across eleven writes."
+    }
+  ]
+}

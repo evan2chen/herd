@@ -3,6 +3,7 @@ import { deleteBranch, isAncestor, prune, removeWorktree, statusEntries } from '
 import { ACTIVE_STATES, withLedger } from '../ledger.js';
 import { print } from '../output.js';
 import { closePaneIfLive, pruneOverflowTabs } from '../tabs.js';
+import { buildRecap } from './recap.js';
 
 export const summary = 'Close finished panes and remove worktrees whose work is integrated, discarded or read-only';
 export const usage = 'herd reap';
@@ -33,12 +34,21 @@ export function decide(entry) {
 export async function run() {
   const anchor = anchorContext();
   const result = await withLedger(anchor, async (ledger) => {
+    const decisions = ledger.agents.map((entry) => [entry, decide(entry)]).filter(([, decision]) => decision);
+    const recap = {};
+    if (decisions.some(([, decision]) => decision.remove)) {
+      try {
+        const saved = await buildRecap({ anchor, ledger });
+        recap.recap = saved.file;
+        recap.help = saved.help;
+      } catch (err) {
+        recap.recapError = err.message;
+      }
+    }
     const removed = [];
     const kept = [];
     const repos = new Set();
-    for (const entry of ledger.agents) {
-      const decision = decide(entry);
-      if (!decision) continue;
+    for (const [entry, decision] of decisions) {
       if (!decision.remove) {
         kept.push({ id: entry.id, state: entry.state, reason: decision.reason, age: age(entry.reportedAt ?? entry.started ?? entry.queued) });
         continue;
@@ -53,7 +63,7 @@ export async function run() {
       removed.push({ id: entry.id, reason: decision.reason });
     }
     for (const repo of repos) prune(repo);
-    return { removed, kept, tabsClosed: pruneOverflowTabs(ledger, anchor) };
+    return { ...recap, removed, kept, tabsClosed: pruneOverflowTabs(ledger, anchor) };
   });
   print(result);
 }
