@@ -26,6 +26,11 @@ export function repoInfo(cwd) {
   return { toplevel, head: out(toplevel, ['rev-parse', 'HEAD']), branch };
 }
 
+export function repoRoot(cwd) {
+  const probe = git(cwd, ['rev-parse', '--show-toplevel'], { allowFail: true });
+  return probe.status === 0 ? path.resolve(probe.stdout.trim()) : null;
+}
+
 export function statusEntries(dir, exclude = []) {
   return out(dir, ['status', '--porcelain', '--untracked-files=all'])
     .split(/\r?\n/)

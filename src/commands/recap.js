@@ -1,11 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { excludeFromGit } from '../agent-files.js';
 import { loadConfig } from '../config.js';
 import { anchorContext } from '../context.js';
 import { HerdError } from '../errors.js';
+import { repoRoot } from '../git.js';
 import { readLedger } from '../ledger.js';
 import { print } from '../output.js';
-import { sessionDir } from '../paths.js';
 import { renderPage } from '../telemetry/page.js';
 import { buildRun } from '../telemetry/run.js';
 
@@ -32,13 +33,18 @@ export function summarize(run, file) {
   };
 }
 
-export async function buildRecap({ anchor, ledger, config = loadConfig(), out, now = new Date().toISOString() }) {
+export function recapsDir(cwd) {
+  return path.join(repoRoot(cwd) ?? path.resolve(cwd), '.herd', 'recaps');
+}
+
+export async function buildRecap({ anchor, ledger, config = loadConfig(), out, cwd = process.cwd(), now = new Date().toISOString() }) {
   try {
     ledger ??= await readLedger(anchor);
     const snapshot = await buildRun({ anchor, ledger, config, now });
     const timestamp = new Date(now).toISOString().replace(/[:.]/g, '-');
-    const file = path.resolve(out ?? path.join(sessionDir(anchor.pane), 'recaps', `${timestamp}.html`));
+    const file = path.resolve(out ?? path.join(recapsDir(cwd), `${timestamp}.html`));
     await fs.mkdir(path.dirname(file), { recursive: true });
+    if (!out) excludeFromGit(cwd);
     await fs.writeFile(file, renderPage(snapshot, { live: false }), 'utf8');
     return summarize(snapshot, file);
   } catch (err) {

@@ -132,6 +132,9 @@ test('reap removes every finished worktree and branch', { skip: !inHerdr }, () =
   assert.equal(result.status, 0, result.text);
   assert.deepEqual(result.out.removed.map((entry) => entry.id).sort(), Object.values(agents).map((agent) => agent.id).sort(), result.text);
   assert.deepEqual(result.out.kept, []);
+  assert.equal(path.dirname(result.out.recap), path.join(fs.realpathSync(h.workDir), '.herd', 'recaps'));
+  assert.ok(fs.existsSync(result.out.recap));
+  assert.equal(git(h.workDir, 'status', '--porcelain', '--untracked-files=all'), '');
   assert.equal(git(h.workDir, 'branch', '--list', 'herd/*'), '');
   assert.equal(git(h.workDir, 'worktree', 'list', '--porcelain').split('\n').filter((line) => line.startsWith('worktree ')).length, 1);
   assert.deepEqual(fs.readdirSync(path.join(h.base, '.herd-worktrees', 'repo')), []);
