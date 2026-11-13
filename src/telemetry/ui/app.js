@@ -1,7 +1,7 @@
 let run = JSON.parse(document.getElementById('herd-run').textContent);
 const pageSize = 12;
 const state = {
-  view: 'overview', agent: null, at: null, zoom: 100, hover: null, page: 0,
+  view: 'overview', agent: null, at: null, zoom: 100, center: null, dragging: false, hover: null, page: 0,
   search: '', provider: '', status: '', sort: 'id', density: run.agents.length > 12 ? 'compact' : 'comfortable',
   fileSearch: '', treeLimit: 100, rootFiles: false, rootFilesCollapsed: false,
   expanded: new Set(), searchCollapsed: new Set(), fileDetails: new Set(), worktrees: new Set(),
@@ -140,6 +140,7 @@ function inspectAgent(button) {
   state.agent = button.dataset.inspect || null;
   state.at = button.dataset.at || null;
   state.zoom = 100;
+  state.center = null;
   clearFilters();
   switchView(state.at ? 'timeline' : 'agents');
   const agents = selectedAgents();
@@ -150,6 +151,70 @@ function inspectAgent(button) {
   const section = document.getElementById(`view-${state.view}`);
   const selector = state.view === 'agents' ? '.agent-card.selected-agent' : '.lane-name.focus-time';
   (section.querySelector(selector) || section).scrollIntoView({ block: 'center' });
+}
+
+function setViewport(anchor, fraction, requestedSpan) {
+  const [start, end] = fullWindow();
+  const span = Math.min(end - start, Math.max(minSpan, requestedSpan));
+  const from = Math.max(start, Math.min(end - span, anchor - fraction * span));
+  state.zoom = span / (end - start) * 100;
+  state.center = from + span >= end ? null : from + span / 2;
+}
+
+function zoomTimeline(fraction, factor) {
+  const [from, to] = bounds();
+  setViewport(from + fraction * (to - from), fraction, (to - from) * factor);
+}
+
+function panTimeline(fraction) {
+  const [from, to] = bounds();
+  setViewport(from + fraction * (to - from), 0, to - from);
+}
+
+function timelineLanes(target) {
+  const grid = target.closest?.('.timeline-grid');
+  const lanes = grid?.querySelector('.lane svg');
+  return lanes ? lanes.getBoundingClientRect() : null;
+}
+
+function handleWheel(event) {
+  const box = timelineLanes(event.target);
+  if (!box?.width) return;
+  event.preventDefault();
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? box.width : 1;
+  const dx = event.deltaX * unit;
+  const dy = event.deltaY * unit;
+  if (event.shiftKey || Math.abs(dx) > Math.abs(dy)) {
+    panTimeline((Math.abs(dx) > Math.abs(dy) ? dx : dy) / box.width);
+  } else {
+    const fraction = Math.max(0, Math.min(1, (event.clientX - box.left) / box.width));
+    zoomTimeline(fraction, Math.exp(dy * (event.ctrlKey ? .01 : .002)));
+  }
+  hideTooltip();
+  scheduleRender();
+}
+
+function handleDrag(event) {
+  const drag = state.dragging;
+  if (!drag) return;
+  panTimeline(-(event.clientX - drag.x) / drag.width);
+  drag.x = event.clientX;
+  hideTooltip();
+  scheduleRender();
+}
+
+function startDrag(event) {
+  if (event.button !== 0 || !event.target.closest('.timeline-grid .lane')) return;
+  const box = timelineLanes(event.target);
+  if (!box?.width) return;
+  state.dragging = { x: event.clientX, width: box.width };
+  scheduleRender();
+}
+
+function endDrag() {
+  if (!state.dragging) return;
+  state.dragging = false;
+  scheduleRender();
 }
 
 function toggle(set, value) {
@@ -196,8 +261,10 @@ function handleClick(event) {
     else state.rootFiles = !state.rootFiles;
   }
   if ('moreFiles' in data) state.treeLimit += 100;
+  if (data.zoom) zoomTimeline(.5, data.zoom === 'in' ? 1 / 1.5 : 1.5);
   if ('reset' in data) {
     state.zoom = 100;
+    state.center = null;
     state.at = null;
     state.agent = null;
   }
@@ -206,9 +273,7 @@ function handleClick(event) {
 
 function handleInput(event) {
   const input = event.target;
-  if (input.id === 'zoom') {
-    state.zoom = Number(input.value);
-  } else if (input.dataset.control) {
+  if (input.dataset.control) {
     state[input.dataset.control] = input.value;
     state.page = 0;
     if (input.dataset.control === 'fileSearch') {
@@ -227,9 +292,14 @@ function bindInteractions() {
   document.addEventListener('click', handleClick);
   document.addEventListener('input', handleInput);
   document.addEventListener('visibilitychange', scheduleRender);
+  document.addEventListener('wheel', handleWheel, { passive: false });
+  document.addEventListener('pointerdown', startDrag);
+  document.addEventListener('pointermove', handleDrag);
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
   document.addEventListener('pointerover', event => {
     const target = event.target.closest('[data-tip]');
-    if (!target) return;
+    if (!target || state.dragging) return;
     state.hover = { key: target.dataset.key, x: event.clientX, y: event.clientY };
     refreshTooltip();
   });

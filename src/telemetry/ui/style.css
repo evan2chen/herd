@@ -603,7 +603,17 @@ main {
 .timeline-grid {
   display:grid;
   grid-template-columns:170px minmax(0,1fr);
-  align-items:center
+  align-items:center;
+  user-select:none
+}
+
+.timeline-grid .lane {
+  cursor:grab;
+  touch-action:pan-y
+}
+
+.timeline-grid.dragging .lane,.timeline-grid.dragging .chart-mark {
+  cursor:grabbing
 }
 
 .axis {

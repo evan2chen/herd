@@ -175,20 +175,26 @@ function timeline() {
   const filtered = selectedAgents();
   const items = pageItems(filtered);
   const [start, end] = bounds();
+  const [runStart, runEnd] = fullWindow();
+  const precision = end - start < 600000 ? 8 : 5;
   const ticks = [0, .25, .5, .75, 1].map(fraction =>
-    `<span>${clock(new Date(start + fraction * (end - start)).toISOString()).slice(0, 5)}</span>`
+    `<span>${clock(new Date(start + fraction * (end - start)).toISOString()).slice(0, precision)}</span>`
   ).join('');
   const focus = state.at ? `<span class="focus-time">Focus ${clock(state.at)} UTC ${esc(state.agent || '')}</span>` : '';
+  const atFull = end - start >= runEnd - runStart;
+  const atMinimum = end - start <= minSpan;
   return intro('Shared timeline', 'UTC · prompt ticks above · background jobs below') + agentControls(filtered)
     + pagination(filtered) + `
-    <div class="toolbar"><label for="zoom">Visible window</label>
-      <input id="zoom" type="range" min="10" max="100" step="10" value="${state.zoom}">
-      <span>${state.zoom}%</span><button data-reset>Reset range</button>${focus}
-    </div><div class="panel"><div class="timeline-grid ${state.density}">
+    <div class="toolbar"><span>Visible window</span>
+      <button data-zoom="out" ${atFull ? 'disabled' : ''}>Zoom out</button>
+      <button data-zoom="in" ${atMinimum ? 'disabled' : ''}>Zoom in</button>
+      <span>${duration((end - start) / 1000)} of ${duration((runEnd - runStart) / 1000)}</span>
+      <button data-reset>Reset range</button>${focus}
+    </div><div class="panel"><div class="timeline-grid ${state.density} ${state.dragging ? 'dragging' : ''}">
       <div class="lane-name muted">Agent / provider</div><div class="axis">${ticks}</div>
       ${items.map(timelineLane).join('')}</div>
       ${items.length ? '' : empty('No agents match these filters')}${timelineLegend()}
-    </div>${pagination(filtered)}<p class="help-text">Hover or focus a segment for details. Older operations fade in live mode.</p>`;
+    </div>${pagination(filtered)}<p class="help-text">Scroll to zoom at the pointer, Shift+scroll or drag to pan. Hover or focus a segment for details. Older operations fade in live mode.</p>`;
 }
 
 function contextCard(agent) {
