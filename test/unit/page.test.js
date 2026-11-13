@@ -39,6 +39,7 @@ function ui(snapshot = run, live = false) {
   const startup = /bindInteractions\(\);\r?\nrender\(\);\r?\nif \(live\) connectLive\(\);/;
   const exported = source.replace(startup, `globalThis.ui = {
     state, renderers, selectedAgents, pageItems, buildFileTree, currentPaths, validSnapshot,
+    bounds, zoomTimeline, panTimeline,
     update: next => { run = next; }
   };`);
   const context = {
@@ -176,6 +177,33 @@ test('tree aggregation preserves snapshots and highlights current files with the
   assert.equal(app.buildFileTree().reads, 3);
   assert.equal(JSON.stringify(snapshot), original);
   assert.deepEqual(Array.from(app.currentPaths()).sort(), ['src', 'src/api', 'src/api/events.ts']);
+});
+
+test('timeline zooms around the pointer, pans within the run and resumes following the live edge', () => {
+  const app = ui(run, true);
+  const start = Date.parse(run.window.start);
+  const end = Date.parse(run.window.end);
+  const full = end - start;
+  assert.deepEqual(Array.from(app.bounds()), [start, end]);
+  app.zoomTimeline(.25, .5);
+  let [from, to] = app.bounds();
+  assert.equal(to - from, full / 2);
+  assert.equal(from, start + full * .125);
+  app.panTimeline(-10);
+  assert.equal(app.bounds()[0], start);
+  app.panTimeline(10);
+  assert.deepEqual(Array.from(app.bounds()), [end - full / 2, end]);
+  assert.equal(app.state.center, null);
+  app.zoomTimeline(.5, 1e-9);
+  [from, to] = app.bounds();
+  assert.equal(to - from, 2000);
+  assert.match(app.renderers.timeline(), /data-zoom="in" disabled/);
+  assert.doesNotMatch(app.renderers.timeline(), /data-zoom="out" disabled/);
+  assert.match(app.renderers.timeline(), /\d\d:\d\d:\d\d<\/span>/);
+  app.zoomTimeline(.5, 1e9);
+  assert.equal(app.state.zoom, 100);
+  assert.equal(app.state.center, null);
+  assert.match(app.renderers.timeline(), /data-zoom="out" disabled/);
 });
 
 test('cached views have unique form IDs and labels address their own controls', () => {

@@ -16,11 +16,17 @@ function age(time) {
   return Math.max(.4, 1 - elapsed / span * .6);
 }
 
-function bounds() {
+const minSpan = 2000;
+
+function fullWindow() {
   const start = ms(run.window.start);
-  const end = Math.max(start + 1000, ms(run.window.end));
-  const span = (end - start) * state.zoom / 100;
-  const center = state.at ? ms(state.at) : end - span / 2;
+  return [start, Math.max(start + 1000, ms(run.window.end))];
+}
+
+function bounds() {
+  const [start, end] = fullWindow();
+  const span = Math.min(end - start, Math.max(minSpan, (end - start) * state.zoom / 100));
+  const center = state.center ?? end - span / 2;
   const from = Math.max(start, Math.min(end - span, center - span / 2));
   return [from, from + span];
 }
@@ -73,9 +79,7 @@ function timelineSegment(agent, segment, index, mini, start, end, x) {
 }
 
 function timelineSvg(agent, mini = false) {
-  const startOfRun = ms(run.window.start);
-  const fullRange = [startOfRun, Math.max(startOfRun + 1000, ms(run.window.end))];
-  const [start, end] = mini ? fullRange : bounds();
+  const [start, end] = mini ? fullWindow() : bounds();
   const x = at => percent((ms(at) - start) / (end - start) * 100) * 10;
   const segments = agent.timeline.map((segment, index) =>
     timelineSegment(agent, segment, index, mini, start, end, x)
