@@ -58,7 +58,7 @@ The `[policy]` command lists become a generated `--settings` file for Claude and
 
 `verify` requires repo commands configured below; its output reports `result` as `pass` or `fail`. `integrate` requires a clean target checkout and a settled write agent; review and verification are orchestrator steps. `close` preserves worktrees; `reap` removes integrated, discarded and finished read worktrees, retaining write work that still needs a decision. `reconcile` repairs missing-pane/worktree ledger entries and lists orphan worktrees for review.
 
-`recap [--out <file>]` saves a self-contained HTML report of agent costs, tokens, activity, context, files and shared errors under `<sessionDir>/recaps/<timestamp>.html`. `reap` saves one before cleanup when the session has agents. `watch [--port <n>]` serves the same views live on localhost, polling only while viewers are connected. Both print their location; open it in a browser yourself, and press Ctrl+C to stop `watch`.
+`recap [--out <file>]` saves a self-contained HTML report of agent costs, tokens, activity, context, files and shared errors under `<repo>/.herd/recaps/<timestamp>.html` (git-excluded) in the repository containing the orchestrator's working directory. `reap` saves one before cleanup when the session has agents. `watch [--port <n>]` serves the same views live on localhost, polling only while viewers are connected. Both print their location; open it in a browser yourself, and press Ctrl+C to stop `watch`.
 
 ## Configuration
 

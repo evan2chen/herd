@@ -12,7 +12,7 @@ export function agentFiles(cwd, id) {
   return { dir, brief: path.join(dir, 'brief.md'), report: path.join(dir, 'report.json') };
 }
 
-function excludeFromGit(cwd) {
+export function excludeFromGit(cwd) {
   const { status, stdout } = run('git', ['-C', cwd, 'rev-parse', '--git-common-dir']);
   if (status !== 0) return;
   const infoDir = path.join(path.resolve(cwd, stdout.trim()), 'info');

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
 import { encode } from '@toon-format/toon';
@@ -62,8 +63,12 @@ async function stream(url) {
 
 test('recap builds a self-contained file from a transcript-free ledger and supports --out', async (t) => {
   const { dir, anchor } = setup(t);
-  const result = await buildRecap({ anchor, now });
-  assert.equal(result.file, path.join(sessionDir(anchor.pane), 'recaps', '2026-11-01T00-00-20-000Z.html'));
+  const project = path.join(dir, 'project');
+  fs.mkdirSync(path.join(project, 'src'), { recursive: true });
+  assert.equal(spawnSync('git', ['init', '--quiet', project]).status, 0);
+  const result = await buildRecap({ anchor, cwd: path.join(project, 'src'), now });
+  assert.equal(result.file, path.join(fs.realpathSync(project), '.herd', 'recaps', '2026-11-01T00-00-20-000Z.html'));
+  assert.equal(spawnSync('git', ['-C', project, 'status', '--porcelain', '--untracked-files=all']).stdout.toString(), '');
   const html = fs.readFileSync(result.file, 'utf8');
   assert.match(html, /^<!doctype html>/i);
   assert.doesNotMatch(html, /<(?:script|link|img)[^>]+(?:src|href)="(?!data:)/i);
